@@ -1,102 +1,208 @@
-# Codex Context Optimizer
+<h1 align="center">Codex Context Optimizer</h1>
 
-[![CI](https://github.com/nguyenduytan/codex-context-optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/nguyenduytan/codex-context-optimizer/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/nguyenduytan/codex-context-optimizer)](https://github.com/nguyenduytan/codex-context-optimizer/releases) [![Crates.io](https://img.shields.io/crates/v/ctxc.svg)](https://crates.io/crates/ctxc) [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Stars](https://img.shields.io/github/stars/nguyenduytan/codex-context-optimizer?style=social)](https://github.com/nguyenduytan/codex-context-optimizer/stargazers)
+<p align="center"><strong>Less context. More signal.</strong></p>
 
-**A local-first context compiler and execution-budget governor for Codex and AI coding workflows.**
+<p align="center">
+  <a href="https://github.com/nguyenduytan/codex-context-optimizer/actions/workflows/ci.yml"><img src="https://github.com/nguyenduytan/codex-context-optimizer/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/nguyenduytan/codex-context-optimizer/releases"><img src="https://img.shields.io/github/v/release/nguyenduytan/codex-context-optimizer" alt="Latest release"></a>
+  <a href="Cargo.toml"><img src="https://img.shields.io/badge/Rust-1.98%2B-00875A" alt="Rust 1.98+"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License"></a>
+  <a href="https://github.com/nguyenduytan/codex-context-optimizer/stargazers"><img src="https://img.shields.io/github/stars/nguyenduytan/codex-context-optimizer?style=social" alt="GitHub stars"></a>
+</p>
 
-Less context. More signal. `ctxc` compiles task intent into an inspectable contract, protects high-risk constraints, bounds repository context/tool output, selects the lowest adequate reasoning effort and prevents wasteful retries.
+<p align="center"><strong>English</strong> · <a href="README.vi.md">Tiếng Việt</a> · <a href="README.zh-CN.md">简体中文</a></p>
 
-> **v0.1 is Codex-first.** It does not intercept ChatGPT's private hidden context, control private chain-of-thought, or promise a quota-saving percentage. Claims require measured benchmarks.
+<p align="center">A local-first context compiler and execution-budget governor for Codex and AI coding workflows.</p>
 
-![GitHub stars chart](https://starchart.cc/nguyenduytan/codex-context-optimizer.svg)
+`ctxc` builds an inspectable execution contract around your task, protects explicit constraints, selects relevant context and applies supported runtime budget controls. The compiler runs locally, without a second model call.
 
-## Contents
+> **Scope:** v0.1 focuses on Codex CLI. It cannot rewrite ChatGPT's hidden context or control private chain-of-thought. Token estimates are approximate; no percentage of quota savings is promised.
 
-- [Install](#install)
-- [Quick start](#quick-start)
-- [Commands](#commands)
-- [Optimization](#optimization)
-- [Configuration](#configuration)
-- [Architecture](#architecture)
-- [Privacy and security](#privacy-and-security)
-- [Development](#development)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
+### 🧭 Explore
 
-## Install
+- [📦 Installation](#installation)
+- [🚀 Quick Start](#quick-start)
+- [🧰 Commands and Options](#commands)
+- [🎯 How Optimization Works](#optimization)
+- [⚙️ Configuration](#configuration)
+- [🧱 Architecture](#architecture)
+- [🔒 Privacy and Security](#privacy)
+- [🧪 Development and Validation](#development)
+- [🗺️ Roadmap](#roadmap)
+- [🤝 Contributing](#contributing)
+- [⭐ Star History](#star-history)
+- [📄 License](#license)
 
-Native releases target Linux x86_64/ARM64, macOS Intel/Apple Silicon and Windows x86_64/ARM64. Archives are checked with `SHA256SUMS`.
+<a id="installation"></a>
+
+## 📦 Installation
+
+### Requirements
+
+- `ctxc plan` runs locally without Codex, authentication or an API key.
+- `ctxc run` requires Codex CLI installed and authenticated separately.
+- Native binaries do not require Rust. Building from source requires **Rust 1.98+**, as declared in this repository's `Cargo.toml`.
+- Run inside a Git repository for normal Codex execution.
+
+### Build from Source
+
+Use this route if a matching release is not yet available:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nguyenduytan/codex-context-optimizer/main/scripts/install.sh | CTXC_REPOSITORY=nguyenduytan/codex-context-optimizer sh
+git clone https://github.com/nguyenduytan/codex-context-optimizer.git
+cd codex-context-optimizer
+cargo install --path crates/cli --locked
+ctxc --version
 ```
 
-PowerShell:
+### Native Binaries
+
+Check [GitHub Releases](https://github.com/nguyenduytan/codex-context-optimizer/releases) for published artifacts. The installers below default to `v0.1.0`; they require that tag and its assets to exist. A release badge is not proof that all platform downloads are available.
+
+**Linux / macOS**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nguyenduytan/codex-context-optimizer/main/scripts/install.sh -o install-ctxc.sh
+# Review the downloaded script before running it.
+sh install-ctxc.sh
+```
+
+**Windows PowerShell**
 
 ```powershell
-iwr https://raw.githubusercontent.com/nguyenduytan/codex-context-optimizer/main/scripts/install.ps1 -UseBasicParsing | iex
+Invoke-WebRequest https://raw.githubusercontent.com/nguyenduytan/codex-context-optimizer/main/scripts/install.ps1 -OutFile install-ctxc.ps1
+# Review the downloaded script before running it.
+.\install-ctxc.ps1
 ```
 
-The installers do not edit PATH, install a daemon, modify global Codex config or send telemetry. Source builds are also supported:
+Installers verify `SHA256SUMS`. Their default destinations are `~/.local/bin` and `%LOCALAPPDATA%\ctxc\bin`; add the destination to PATH yourself if needed. They do not edit PATH or global Codex configuration.
+
+Select a version/directory with `CTXC_VERSION` / `CTXC_INSTALL_DIR` (shell), or `-Version` / `-InstallDir` (PowerShell). Replacing an existing binary requires `CTXC_FORCE=1` or `-Force`.
+
+The release workflow targets Linux x86_64/ARM64, macOS Intel/Apple Silicon and Windows x86_64/ARM64. Availability depends on successful release builds. See [installation details](docs/installation.md).
+
+### Cargo Registry
+
+Only after this project's `ctxc` package is published and its ownership is verified on crates.io:
 
 ```bash
-# After ctxc is published to crates.io:
-cargo install ctxc
-git clone https://github.com/nguyenduytan/codex-context-optimizer.git
-cd codex-context-optimizer && cargo install --path crates/cli
+cargo install ctxc --locked
 ```
 
-## Quick start
+<a id="quick-start"></a>
+
+## 🚀 Quick Start
+
+First inspect a task locally, then run it deliberately:
 
 ```bash
 cd your-repository
 ctxc init
+ctxc plan "fix the failing auth test without changing the public API"
+ctxc run --dry-run "fix the failing auth test without changing the public API"
 ctxc "fix the failing auth test without changing the public API"
-ctxc plan "fix the failing auth test"
-ctxc run --dry-run "fix the failing auth test"
 ctxc explain
 ctxc usage
 ```
 
-`ctxc` is shorthand for `ctxc run`; `plan` never starts Codex; `doctor` is read-only. Use `ctxc run --passthrough "task"` for an explicit escape hatch.
+`ctxc "task"` is shorthand for `ctxc run "task"`. `plan` does not launch Codex; `doctor` and `run --dry-run` may probe version/help but do not start a model run. Only actual runs create usage history.
 
-## Commands
+**Pass through the original task without optimization:**
+
+```bash
+ctxc run --passthrough "task"
+```
+
+**Choose higher effort explicitly:**
+
+```bash
+ctxc run --effort high "investigate this concurrency issue"
+```
+
+<a id="commands"></a>
+
+## 🧰 Commands and Options
 
 | Command | Behavior |
 | --- | --- |
-| `ctxc init` | Create versioned config, bounded project map and private-state ignore rules. |
-| `ctxc doctor` | Check ctxc, Codex, Git and config without model usage. |
-| `ctxc plan <task>` | Compile locally. |
-| `ctxc run <task>` | Compile and run Codex once. |
-| `ctxc run --dry-run <task>` | Show classification, contract, safe argv and estimates. |
-| `ctxc explain` | Explain latest bounded metadata and trace. |
-| `ctxc usage` | Show observed usage; unavailable values remain unavailable. |
-| `ctxc config` | Print effective config. |
-| `ctxc config set context.budget 8000` | Validate and update one project setting. |
-| `ctxc setup codex` | Explain integration; never edit global config. |
+| `ctxc init` | Create project config, bounded map and private-state ignore rules; preserve existing config. |
+| `ctxc doctor` | Check Codex, Git and configuration without model usage. |
+| `ctxc plan <task>` | Compile locally; no Codex installation required. |
+| `ctxc run <task>` | Compile and launch Codex once. |
+| `ctxc run --dry-run <task>` | Show the contract, estimates and runtime invocation without a model run. |
+| `ctxc explain` | Explain the latest recorded run using metadata and trace reasons. |
+| `ctxc usage` | Display observed usage; missing fields remain unavailable. |
+| `ctxc config` | Show effective configuration. |
+| `ctxc config set context.budget 8000` | Validate and change one project key, retaining comments. |
+| `ctxc setup codex` | Print integration guidance; do not edit global Codex config. |
+| `ctxc setup agents` | Print optional AGENTS.md guidance for manual review. |
+| `ctxc update / ctxc uninstall` | Print update/removal instructions; do not automatically update or delete files. |
 
-Flags include `--mode auto|chat|micro|code|complex`, `--effort auto|minimal|low|medium|high|extreme`, `--agents off|on`, `--web auto|off|on`, `--project-map-limit`, `--tool-output-limit`, `--trace`, `--json`, `--input FILE`, `--passthrough` and `-C DIR`.
+### Common options
 
-## Optimization
-
-| Area | v0.1 behavior |
+| Option | Behavior |
 | --- | --- |
-| Classification | Deterministic `CHAT`, `MICRO`, `CODE`, `COMPLEX` heuristics. |
-| Reasoning | Minimal/low by default; automatic complex effort caps at medium. Explicit effort wins. |
-| Context | Typed CIR blocks, lifecycle/status, deduplication and relevance budget. |
-| Repository map | Path/metadata map, default 8 KiB; excludes dependencies, build trees, generated files and secret-like files. |
-| Tool output | Keeps failure evidence and nearby lines; records truncation. |
-| Codex | `codex exec`, stdin prompts, JSONL where available, capability detection and per-run overrides. |
-| Usage | Bounded metadata only; raw prompts/responses are not stored by default. |
+| `--mode` | `auto`, `chat`, `micro`, `code`, `complex` |
+| `--effort` | `auto`, `minimal`, `low`, `medium`, `high`, `extreme` |
+| `--agents / --web` | `auto`, `off`, `on` |
+| `--verbosity` | `low`, `medium`, `high` (task guidance) |
+| `--project-map-limit / --tool-output-limit` | Map bytes / tool-output tokens. |
+| `--budget` | Context token budget including the configured reserve. |
+| `--input FILE` | Read an explicit JSON `CompileInput`, instead of a positional task. |
+| `--codex-bin PATH` | Use a specific native Codex executable. |
+| `--sandbox` | Explicit `read-only` or `workspace-write`; otherwise inherit Codex settings. |
+| `--json / --trace / -C DIR` | Structured output / decision trace / project directory. |
 
-Explicit negations, paths, identifiers, literals, numbers, commands and acceptance-like lines are protected. If safety is uncertain, ctxc keeps content. It does not promise to rewrite hidden ChatGPT UI context.
+Use `ctxc --help` or `ctxc run --help` for the complete CLI interface.
 
-## Configuration
+<a id="optimization"></a>
 
-`ctxc init` creates `.ctxc/config.toml`. CLI flags override project config, project config overrides user config, and safe built-ins are last. User config is read from `CTXC_USER_CONFIG`, `$XDG_CONFIG_HOME/ctxc/config.toml` or `%APPDATA%/ctxc/config.toml`.
+## 🎯 How Optimization Works
+
+| Task | Default policy |
+| --- | --- |
+| `CHAT` | Minimal intent; no ctxc repository scan/map. |
+| `MICRO` | Low effort and narrow validation guidance; no generated repository map. |
+| `CODE` | Low effort, bounded map, targeted investigation. |
+| `COMPLEX` | Medium effort for architecture, migration, security or concurrency signals. |
+
+Automatic effort never exceeds medium. Agents are off by default, and ctxc does not automatically retry model runs. The adapter maps intent to available runtime controls: for the verified Codex family, minimal maps to low. Model/provider support can differ.
+
+Protected content includes negations, paths, literals, identifiers, numbers, commands and acceptance constraints. v0.1 preserves the original request instead of attempting arbitrary semantic rewriting.
+
+**Request**
+
+```text
+Fix refresh token expiration in src/auth.ts. Do NOT change the public API.
+```
+
+**Contract excerpt**
+
+```text
+[TASK]
+Objective / original request (preserved):
+Fix refresh token expiration in src/auth.ts. Do NOT change the public API.
+
+Execution: Use the smallest sufficient investigation and targeted tests.
+```
+
+The compiler budgets supplied context, removes exact duplicates and prunes eligible inactive blocks. Protected content may exceed the budget rather than be lost. Short requests may become longer due to contract overhead.
+
+The default project map is bounded to **8 KiB**. It uses paths/metadata, honors local ignore rules and excludes dependency/build trees and secret-like names without reading source bodies.
+
+The standalone core log reducer preserves failure evidence. The Codex adapter does **not** intercept internal tool output; it applies Codex's native output-history limit when supported. Stop conditions and targeted-test preferences are guidance, not hard enforcement.
+
+See [compatibility and limits](docs/compatibility.md) and [benchmarking](docs/benchmarking.md).
+
+<a id="configuration"></a>
+
+## ⚙️ Configuration
+
+`ctxc init` creates `.ctxc/config.toml`. For ordinary prompt commands, precedence is **CLI flags → project config → user config → defaults**. `--input` supplies its own protocol policy; CLI flags can override it.
 
 ```toml
+version = 1
+
 [reasoning]
 default = "low"
 complex = "medium"
@@ -105,6 +211,8 @@ max_auto = "medium"
 [context]
 project_map_max_bytes = 8192
 tool_output_token_limit = 4000
+budget = 12000
+reserve = 2000
 history_budget = 0
 
 [agents]
@@ -120,50 +228,89 @@ store_prompts = false
 store_responses = false
 ```
 
-Unknown keys warn. Unsafe v0.1 settings fail closed.
+User config is read from `CTXC_USER_CONFIG`, then the applicable location: `$XDG_CONFIG_HOME/ctxc/config.toml`, `%APPDATA%/ctxc/config.toml` on Windows, or `~/.config/ctxc/config.toml` on Unix. Unknown keys warn; unsupported safety settings are rejected. These are **ctxc policy keys**, not a file to paste into Codex global config.
 
-## Architecture
+<a id="architecture"></a>
+
+## 🧱 Architecture
 
 ```text
-request/context -> normalize + protected spans -> classify -> Context IR
-  -> relevance/lifecycle/dedup/budget -> contract + fidelity guard
-  -> Codex adapter -> JSONL usage/events -> bounded local metadata
+request + context
+  -> normalize + protect -> classify -> Context IR
+  -> relevance + lifecycle + dedup + budget
+  -> contract + fidelity guard
+  -> Codex adapter -> JSONL events -> local metadata
 ```
 
-- `crates/protocol`: stable serializable IR and result types.
-- `crates/core`: pure compiler, policy, estimator and reducer.
-- `crates/codex-adapter`: safe process construction, capability mapping and JSONL parser.
-- `crates/cli`: commands, config, project map and bounded storage.
+- [`crates/protocol`](crates/protocol): Versioned serializable IR and result types.
+- [`crates/core`](crates/core): Pure compiler, policy engine, estimator and log reducer.
+- [`crates/codex-adapter`](crates/codex-adapter): Native process execution, compatibility mapping and JSONL parser.
+- [`crates/cli`](crates/cli): Commands, project config, repository map and metadata storage.
 
-See [docs/architecture.md](docs/architecture.md), [docs/context-ir.md](docs/context-ir.md), [docs/policies.md](docs/policies.md), [docs/codex.md](docs/codex.md), [docs/privacy.md](docs/privacy.md) and [docs/threat-model.md](docs/threat-model.md).
+Technical references: [architecture](docs/architecture.md), [CIR](docs/context-ir.md), [policies](docs/policies.md) and [Codex adapter](docs/codex.md).
 
-## Privacy and security
+<a id="privacy"></a>
 
-ctxc adds no network service, API key or telemetry. Codex may still use its normal provider traffic. ctxc passes prompts through stdin, never shell-interpolates task text, avoids source-body project scans and redacts common secrets in diagnostics. Local history stores bounded metadata rather than prompt/response bodies. See [SECURITY.md](SECURITY.md).
+## 🔒 Privacy and Security
 
-## Development
+- No extra model call, ctxc service, API key or telemetry.
+- Core processing is local. Codex may still send data through its normal provider connection.
+- Run history stores bounded metadata, not prompt/response bodies.
+- Prompts travel over stdin, never through shell interpolation.
+- Common secret patterns are redacted from diagnostics. Explicit plan output shows the contract, so treat it as private.
+- `ctxc init` does not overwrite AGENTS.md or global Codex config.
+
+See [privacy](docs/privacy.md), [threat model](docs/threat-model.md) and [security reporting](SECURITY.md).
+
+<a id="development"></a>
+
+## 🧪 Development and Validation
+
+Run the repository checks with Rust 1.98+:
 
 ```bash
 cargo fmt --all --check
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo test --workspace
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+cargo test --workspace --locked
 ```
 
-CI never authenticates to or invokes a live model. Fake Codex fixtures cover JSONL, malformed events, quota errors, interruption and argument safety.
+CI covers Windows, Linux and macOS. Tests use a fake Codex executable, not live AI credits. A red CI badge means a check needs investigation; use the failed job's log for the actual cause. See [contributing](CONTRIBUTING.md).
 
-## Roadmap
+<a id="roadmap"></a>
 
-- **v0.1:** Codex Foundation.
+## 🗺️ Roadmap
+
+- **v0.1:** Codex Foundation: compiler, policy, native CLI and adapter.
 - **v0.2:** OpenAI Responses API middleware and TypeScript/Python packages.
-- **v0.3:** ChatGPT skill-first and optional Apps SDK/MCP tool integration.
-- **v0.4+:** persistent lifecycle, other providers and opt-in semantic optimizers after benchmarks.
+- **v0.3:** ChatGPT skill-first integration and optional Apps SDK/MCP tools.
+- **v0.4+:** Persistent lifecycle, additional providers and opt-in semantic optimizers after benchmarks.
 
-See [CONTEXT_OPTIMIZER_MASTER_PLAN.md](CONTEXT_OPTIMIZER_MASTER_PLAN.md) for the complete specification and [docs/publishing.md](docs/publishing.md) for the GitHub release checklist.
+<a id="contributing"></a>
 
-## Contributing
+## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Every optimization must explain waste removed, fidelity risk, tests and inspection/disable controls. Do not commit credentials, private prompts, `.ctxc` state or unmeasured savings claims.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Describe waste removed, fidelity risk, tests and inspection/disable controls. Keep all three README translations in sync; never commit credentials, private prompts or private `.ctxc` state.
 
-## License
+<a id="star-history"></a>
 
-MIT. See [LICENSE](LICENSE).
+## ⭐ Star History
+
+<p align="center">
+  <a href="https://www.star-history.com/#nguyenduytan/codex-context-optimizer&amp;Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=nguyenduytan/codex-context-optimizer&amp;type=Date&amp;theme=dark">
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=nguyenduytan/codex-context-optimizer&amp;type=Date">
+      <img src="https://api.star-history.com/svg?repos=nguyenduytan/codex-context-optimizer&amp;type=Date" alt="Star history for Codex Context Optimizer" width="800">
+    </picture>
+  </a>
+</p>
+
+Live chart supplied by Star History. If the image is temporarily unavailable, open the interactive chart below; external services and GitHub's image cache may refresh at different times.
+
+[Open interactive Star History](https://www.star-history.com/#nguyenduytan/codex-context-optimizer&Date)
+
+<a id="license"></a>
+
+## 📄 License
+
+Released under the **MIT License**. See [LICENSE](LICENSE).

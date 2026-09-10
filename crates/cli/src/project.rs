@@ -200,7 +200,7 @@ pub fn build(root: &Path, limit: usize, cache: bool) -> Result<ProjectMap> {
     }
     let map = ProjectMap {
         version: 1,
-        fingerprint: format!("{:x}", fingerprint.finalize()),
+        fingerprint: lowercase_hex(&fingerprint.finalize()),
         content,
         truncated,
         cached: false,
@@ -215,6 +215,21 @@ pub fn build(root: &Path, limit: usize, cache: bool) -> Result<ProjectMap> {
         }
     }
     Ok(map)
+}
+
+// Encode the bytes rather than relying on the digest container implementing
+// LowerHex. This works with both sha2 0.10 and 0.11 and retains leading zeroes.
+fn lowercase_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    bytes
+        .iter()
+        .flat_map(|byte| {
+            [
+                char::from(HEX[usize::from(byte >> 4)]),
+                char::from(HEX[usize::from(byte & 0x0f)]),
+            ]
+        })
+        .collect()
 }
 
 fn is_manifest(p: &str) -> bool {
@@ -243,6 +258,40 @@ pub fn read_context_file(path: &Path, max_bytes: u64) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn hex_preserves_leading_zeroes() {
+        assert_eq!(lowercase_hex(&[]), "");
+        assert_eq!(
+            lowercase_hex(&[0x00, 0x01, 0x0f, 0x10, 0xab, 0xff]),
+            "00010f10abff"
+        );
+        assert_eq!(lowercase_hex(&[0; 32]), "0".repeat(64));
+    }
+
+    #[test]
+    fn sha256_fingerprint_matches_known_digest() {
+        let actual = lowercase_hex(&Sha256::digest(b"abc"));
+        assert_eq!(
+            actual,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        assert_eq!(actual.len(), 64);
+    }
+
+    #[test]
+    fn project_fingerprint_is_stable_and_tracks_paths() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join("first.rs"), "").unwrap();
+        let first = build(dir.path(), 8192, false).unwrap().fingerprint;
+        assert_eq!(first.len(), 64);
+        assert!(first
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)));
+        assert_eq!(first, build(dir.path(), 8192, false).unwrap().fingerprint);
+        fs::write(dir.path().join("second.rs"), "").unwrap();
+        assert_ne!(first, build(dir.path(), 8192, false).unwrap().fingerprint);
+    }
+
     #[test]
     fn excludes_and_bounds() {
         let d = tempfile::tempdir().unwrap();
