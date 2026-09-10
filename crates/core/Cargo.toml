@@ -1,0 +1,16 @@
+[package]
+name = "ctxc-core"
+description = "Deterministic local-first context compiler and execution policy engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ctxc-protocol.workspace = true
+regex.workspace = true
+thiserror = "2"
+
+[dev-dependencies]
+serde_json.workspace = true

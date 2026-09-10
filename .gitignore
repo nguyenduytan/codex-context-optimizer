@@ -1,0 +1,11 @@
+/target/
+/.tools/
+/.artifacts/
+.ctxc/state/
+.ctxc/project-map.json
+.env
+.env.*
+!.env.example
+*.tmp
+.DS_Store
+Thumbs.db

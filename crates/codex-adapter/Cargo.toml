@@ -1,0 +1,25 @@
+[package]
+name = "ctxc-codex-adapter"
+description = "Safe process and JSONL adapter for Codex CLI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+ctxc-protocol.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[[bin]]
+name = "fake-codex"
+path = "tests/support/fake_codex.rs"
+required-features = ["test-runtime"]
+
+[features]
+test-runtime = []

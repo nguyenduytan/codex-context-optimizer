@@ -1,0 +1,33 @@
+[package]
+name = "ctxc"
+description = "Codex Context Optimizer: local context compiler and execution-budget governor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["codex", "context", "ai", "cli", "optimization"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+ctxc-protocol.workspace = true
+ctxc-core.workspace = true
+ctxc-codex-adapter.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+toml_edit = "0.22"
+anyhow.workspace = true
+regex.workspace = true
+clap = { version = "4", features = ["derive"] }
+ignore = "0.4"
+sha2 = "0.10"
+ctrlc = "3"
+tempfile.workspace = true
+
+[dev-dependencies]
+ctxc-codex-adapter = { workspace = true, features = ["test-runtime"] }
+
+[[bin]]
+name = "ctxc"
+path = "src/main.rs"

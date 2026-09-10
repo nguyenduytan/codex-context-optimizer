@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/protocol", "crates/core", "crates/codex-adapter", "crates/cli"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.98"
+license = "MIT"
+repository = "https://github.com/nguyenduytan/codex-context-optimizer"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+regex = "1"
+toml = "0.8"
+tempfile = "3"
+ctxc-protocol = { path = "crates/protocol", version = "0.1.0" }
+ctxc-core = { path = "crates/core", version = "0.1.0" }
+ctxc-codex-adapter = { path = "crates/codex-adapter", version = "0.1.0" }
+
+[profile.release]
+lto = "thin"
+strip = true

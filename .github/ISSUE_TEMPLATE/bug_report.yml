@@ -1,0 +1,23 @@
+name: Bug report
+description: Report incorrect compilation, runtime behavior or installation
+labels: [bug]
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, ctxc version and Codex version. Redact private paths and credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Sanitized task/config, expected result and actual result. Never paste secrets or private source.
+    validations:
+      required: true
+  - type: textarea
+    id: fidelity
+    attributes:
+      label: Was a constraint lost or changed?
+      description: Include a minimal public example if possible.

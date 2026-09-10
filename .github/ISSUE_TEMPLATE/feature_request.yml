@@ -1,0 +1,14 @@
+name: Feature request
+description: Suggest a focused improvement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What waste or workflow problem does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Fidelity and verification
+      description: What information could be lost? How should the user inspect or disable it?
