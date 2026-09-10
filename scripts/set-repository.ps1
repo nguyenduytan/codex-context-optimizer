@@ -8,7 +8,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$old = 'YOUR_GITHUB_USER/codex-context-optimizer'
+$old = 'nguyenduytan/codex-context-optimizer'
 $new = "$Owner/$Name"
 $files = @('Cargo.toml', 'README.md', 'docs/installation.md', 'docs/publishing.md', 'SECURITY.md', 'CONTRIBUTING.md', 'scripts/install.ps1', 'scripts/install.sh', '.github/ISSUE_TEMPLATE/config.yml')
 $utf8 = New-Object Text.UTF8Encoding($false)
@@ -21,4 +21,8 @@ foreach ($relative in $files) {
         [IO.File]::WriteAllText($path, $updated, $utf8)
     }
 }
-Write-Host "Repository links prepared for $new. Review git diff; no Git remote or external repository was changed."
+if ($Owner -eq 'nguyenduytan' -and $Name -eq 'codex-context-optimizer') {
+    Write-Host "Repository metadata already targets $new. No files changed."
+} else {
+    Write-Host "Repository links prepared for $new. Review git diff; no Git remote or external repository was changed."
+}
