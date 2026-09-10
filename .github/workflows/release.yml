@@ -57,7 +57,7 @@ jobs:
           $name = "ctxc-$env:RELEASE_TAG-$env:TARGET"
           if ($IsWindows) { Compress-Archive -Path staging/* -DestinationPath "artifacts/$name.zip" }
           else { tar -czf "artifacts/$name.tar.gz" -C staging ctxc LICENSE README.md; if ($LASTEXITCODE) { throw 'tar failed' } }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: binaries-${{ matrix.target }}
           path: artifacts/*
